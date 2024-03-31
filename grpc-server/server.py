@@ -13,11 +13,14 @@ load_dotenv()
 
 FILES_LOCATION = os.getenv("FILES_LOCATION")
 MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
-MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024 # 1 GB en bytes
+MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  # 1 GB en bytes
+
 
 class FileService(filetransfer_pb2_grpc.FileServiceServicer):
     def SendChunk(self, request, context):
-        logging.info(f"Recibido chunk {request.chunk_number} del archivo '{request.filename}'")
+        logging.info(
+            f"Recibido chunk {request.chunk_number} del archivo '{request.filename}'"
+        )
 
         # Crear la carpeta si no existe
         folder_path = os.path.join(FILES_LOCATION, request.filename)
@@ -40,8 +43,13 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
                 "newFreeStorage": free_disk,
             },
         )
-        response.raise_for_status()
-
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as ex:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                f"Name server Error: {ex}\nresponse:{response.content}",
+            )
         return filetransfer_pb2.TransferStatus(
             success=True,
             message="Chunk recibido exitosamente",
@@ -78,10 +86,13 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), options=[
-        ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-        ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
-    ])
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[
+            ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
     filetransfer_pb2_grpc.add_FileServiceServicer_to_server(FileService(), server)
     server.add_insecure_port("[::]:50051")
     server.start()
