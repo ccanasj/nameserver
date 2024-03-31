@@ -17,6 +17,7 @@ FILES_LOCATION = os.getenv("FILES_LOCATION")
 MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  # 1 GB en bytes
 
+logging.basicConfig(level=logging.DEBUG)
 
 def replicate_file(filename: str, chunk_number: int, chunk_data: bytes):
     logging.info(filename)
@@ -89,7 +90,7 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
             response.raise_for_status()
         except httpx.HTTPStatusError as ex:
             context.abort(
-                grpc.StatusCode.NOT_FOUND,
+                grpc.StatusCode.INTERNAL,
                 f"Name server Error: {ex}\nresponse:{response.content}",
             )
 
@@ -161,7 +162,7 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
             response.raise_for_status()
         except httpx.HTTPStatusError as ex:
             context.abort(
-                grpc.StatusCode.NOT_FOUND,
+                grpc.StatusCode.INTERNAL,
                 f"Name server Error: {ex}\nresponse:{response.content}",
             )
         return filetransfer_pb2.TransferStatus(
