@@ -17,7 +17,7 @@ FILES_LOCATION = os.getenv("FILES_LOCATION")
 MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  # 1 GB en bytes
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 def replicate_file(filename: str, chunk_number: int, chunk_data: bytes):
     logging.info(filename)
