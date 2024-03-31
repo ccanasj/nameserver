@@ -13,7 +13,7 @@ load_dotenv()
 
 FILES_LOCATION = os.getenv("FILES_LOCATION")
 MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
-MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  * 5 # 5 GB en bytes
+MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024 # 1 GB en bytes
 
 class FileService(filetransfer_pb2_grpc.FileServiceServicer):
     def SendChunk(self, request, context):
