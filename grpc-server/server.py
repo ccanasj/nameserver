@@ -2,21 +2,25 @@ from concurrent import futures
 import grpc
 import os
 import shutil
+import logging
 
+from dotenv import load_dotenv
 import httpx
 import filetransfer_pb2
 import filetransfer_pb2_grpc
 
+load_dotenv()
 
-MAIN_SERVER_URL = "http://34.31.203.46"
+FILES_LOCATION = os.getenv("FILES_LOCATION")
+MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
 
 
 class FileService(filetransfer_pb2_grpc.FileServiceServicer):
     def SendChunk(self, request, context):
-        print(f"Recibido chunk {request.chunk_number} del archivo '{request.filename}'")
+        logging.info(f"Recibido chunk {request.chunk_number} del archivo '{request.filename}'")
 
         # Crear la carpeta si no existe
-        folder_path = os.path.join("../files", request.filename)
+        folder_path = os.path.join(FILES_LOCATION, request.filename)
         os.makedirs(folder_path, exist_ok=True)
 
         # Construir la ruta del archivo donde se guardará el chunk
@@ -47,7 +51,7 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
     def RequestChunk(self, request, context):
         # Construir la ruta al archivo de chunk basado en el filename y chunk_number
         chunk_file_path = os.path.join(
-            "../files", request.filename, str(request.chunk_number)
+            FILES_LOCATION, request.filename, str(request.chunk_number)
         )
 
         try:
@@ -78,7 +82,7 @@ def serve():
     filetransfer_pb2_grpc.add_FileServiceServicer_to_server(FileService(), server)
     server.add_insecure_port("[::]:50051")
     server.start()
-    print("Servidor iniciado en el puerto 50051.")
+    logging.info("Servidor iniciado en el puerto 50051.")
     server.wait_for_termination()
 
 
