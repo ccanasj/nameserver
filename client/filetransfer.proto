@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package filetransfer;
+
+// El servicio que define los métodos RPC que se pueden llamar de forma remota.
+service FileService {
+  // Método existente para enviar un chunk de archivo.
+  rpc SendChunk(ChunkData) returns (TransferStatus);
+
+  // Método existente para solicitar un chunk de archivo.
+  rpc RequestChunk(ChunkRequest) returns (ChunkData);
+
+  // Nuevo método para que un nodo descargue un archivo de otro nodo.
+  rpc DownloadFromOtherNode(ChunkData) returns (TransferStatus);
+}
+
+// Mensaje para los datos de un chunk de archivo.
+message ChunkData {
+  string filename = 1;       // El nombre del archivo.
+  int32 chunk_number = 2;    // El número de chunk.
+  bytes chunk_data = 3;      // El contenido binario del chunk.
+}
+
+// Mensaje para el estado de la transferencia de un chunk.
+message TransferStatus {
+  bool success = 1;          // Indica si la transferencia fue exitosa.
+  string message = 2;        // Un mensaje opcional, por ejemplo, detalles del error.
+  float new_free_storage = 3;
+}
+
+// Mensaje para la solicitud de un chunk de archivo.
+message ChunkRequest {
+  string filename = 1;       // El nombre del archivo solicitado.
+  int32 chunk_number = 2;    // El número de chunk solicitado.
+}
