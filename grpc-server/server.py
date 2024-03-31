@@ -13,7 +13,7 @@ load_dotenv()
 
 FILES_LOCATION = os.getenv("FILES_LOCATION")
 MAIN_SERVER_URL = os.getenv("MAIN_SERVER_URL")
-
+MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  * 5 # 5 GB en bytes
 
 class FileService(filetransfer_pb2_grpc.FileServiceServicer):
     def SendChunk(self, request, context):
@@ -78,7 +78,10 @@ class FileService(filetransfer_pb2_grpc.FileServiceServicer):
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), options=[
+        ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+        ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+    ])
     filetransfer_pb2_grpc.add_FileServiceServicer_to_server(FileService(), server)
     server.add_insecure_port("[::]:50051")
     server.start()
