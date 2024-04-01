@@ -19,13 +19,14 @@ MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024  # 1 GB en bytes
 
 logging.basicConfig(level=logging.INFO)
 
+
 def replicate_file(filename: str, chunk_number: int, chunk_data: bytes):
     logging.info(filename)
     response = httpx.get(f"{MAIN_SERVER_URL}/get-nodes/")
     response.raise_for_status()
     nodes = response.json()
     logging.info(nodes)
-    min_chunk_size_mb = (len(chunk_data) / 1024) * 2
+    min_chunk_size_mb = (len(chunk_data) / (1024**2)) * 2
     logging.info(min_chunk_size_mb)
     selected_nodes = [
         node
