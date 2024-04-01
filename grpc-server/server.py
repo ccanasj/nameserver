@@ -36,7 +36,8 @@ def replicate_file(filename: str, chunk_number: int, chunk_data: bytes):
     logging.info(selected_nodes)
 
     if len(selected_nodes) <= 0:
-        raise Exception("El nodo no existe pa")
+        logging.error("El nodo no existe pa")
+        return None
 
     selected_node = random.choice(selected_nodes)
 
